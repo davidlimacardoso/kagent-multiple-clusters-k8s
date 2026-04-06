@@ -1,0 +1,10 @@
+apiVersion: kagent.dev/v1alpha2
+kind: RemoteMCPServer
+metadata:
+  name: cluster-b-tools
+  namespace: kagent
+spec:
+  url: "https://kagent-mcp-cluster-b.stg.myagent.io/mcp"
+  timeout: 30s
+  sseReadTimeout: 10m0s
+  description: "MCP Tools running on CLUSTER-B"

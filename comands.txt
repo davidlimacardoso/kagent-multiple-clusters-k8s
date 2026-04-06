@@ -1,0 +1,9 @@
+instalar crds 
+helm upgrade --install kagent-crds . --namespace kagent --create-namespace -f values.yaml
+
+instalar kagents
+
+helm upgrade --install kagent kagent/. --namespace kagent -f kagent/clusters/cluster_name/.yaml
+
+Criar  ingress 
+kubectl apply -f ingress/kagent-ui-ingress.yaml

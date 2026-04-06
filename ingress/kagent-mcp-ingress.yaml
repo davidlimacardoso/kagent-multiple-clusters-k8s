@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kagent-mcp-server
+  namespace: kagent
+  labels:
+    app.kubernetes.io/instance: kagent
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: kagent-mcp-server
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/listen-ports: "[{\"HTTPS\":443}]"
+    alb.ingress.kubernetes.io/security-groups: eks-cluster-b-alb-sg
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb-service
+  rules:
+    - host: kagent-mcp-cluster-b.dev.myagent.io
+      http:
+        paths:
+          - path: /mcp
+            pathType: Prefix
+            backend:
+              service:
+                name: kagent-tools
+                port:
+                  number: 8084

@@ -1,0 +1,57 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: cross-cluster-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  declarative:
+    modelConfig: default-model-config
+    systemMessage: |
+      Você é um agente SRE com acesso a ferramentas em dois clusters Kubernetes:
+      
+      **CLUSTER-A (Local):**
+      - Ferramenta k8s_get_resources - consulta recursos do cluster cluster-a
+      
+      **CLUSTER-B (Remoto):**
+      - Ferramenta shell - execute comandos kubectl para consultar o cluster cluster-b
+      - Ferramentas prometheus_* - consulta métricas do Prometheus no cluster-b
+      
+      REGRAS:
+      1. Quando o usuário perguntar sobre "cluster-b" ou "cluster-b": Use a ferramenta SHELL
+         Exemplo: shell com comando "kubectl get nodes" ou "kubectl get pods -n kagent"
+      
+      2. Quando o usuário perguntar sobre "cluster-a" ou não especificar: Use k8s_get_resources
+      
+      3. Para métricas/monitoramento: Use prometheus_query_tool (sempre do cluster-b)
+      
+      4. SEMPRE especifique qual cluster você está consultando na resposta
+
+      5. SEMPRE realize consulta e não faça alterções no cluster sem autorização explícita do usuário.
+      
+      Formato da resposta:
+      ## 🎯 Cluster Consultado: [cluster-a/cluster-b]
+      [Resultados aqui]
+    tools:
+      # Ferramentas do cluster cluster-a (local)
+      - type: McpServer
+        mcpServer:
+          name: kagent-tool-server
+          kind: RemoteMCPServer
+          apiGroup: kagent.dev
+          toolNames:
+            - k8s_get_resources
+            - k8s_get_pod_logs
+            - k8s_describe_resource
+      
+      # Ferramentas do cluster cluster-b (remoto)
+      - type: McpServer
+        mcpServer:
+          name: cluster-b-tools
+          kind: RemoteMCPServer
+          apiGroup: kagent.dev
+          toolNames:
+            - shell
+            - prometheus_query_tool
+            - prometheus_targets_tool
+            - prometheus_label_names_tool
